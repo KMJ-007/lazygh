@@ -193,12 +193,12 @@ fn run_git_command(args: &[&str]) -> Result<String, String> {
     }
 }
 
-pub fn get_current_user() -> Result<Account, String> {
+pub fn get_current_user() -> Result<Option<Account>, String> {
     let name = run_git_command(&["config", "--global", "user.name"])?;
     let email = run_git_command(&["config", "--global", "user.email"])?;
 
     if name.is_empty() || email.is_empty() {
-        return Err("No current user found".to_string());
+        return Ok(None);
     }
 
     let conn = Connection::open(get_db_path()).map_err(|e| e.to_string())?;
@@ -208,9 +208,9 @@ pub fn get_current_user() -> Result<Account, String> {
         |row| row.get(0)
     ).unwrap_or(false);
 
-    Ok(Account {
+    Ok(Some(Account {
         name,
         email,
         is_active,
-    })
+    }))
 }

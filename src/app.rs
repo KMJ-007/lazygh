@@ -133,6 +133,15 @@ impl App {
             add_account_focus: AddAccountField::Name,
         };
         app.status_message = "Welcome to GitSwitch-Gui!".to_string();
+        
+        // Set the active account index based on the current Git user
+        if let Ok(Some(current_user)) = get_current_user() {
+            if let Some(index) = app.accounts.iter().position(|a| a.email == current_user.email) {
+                app.active_account_index = Some(index);
+                app.active_account = Some(index);
+            }
+        }
+        
         Ok(app)
     }
 
@@ -569,13 +578,17 @@ impl App {
 
     fn set_active_account(&mut self, index: usize) {
         if index < self.accounts.len() {
-            let account = &self.accounts[index];
-            if let Err(e) = switch_account(&account.email) {
+            let email = self.accounts[index].email.clone();
+            if let Err(e) = switch_account(&email) {
                 self.set_status(&format!("Failed to switch account: {}", e));
             } else {
+                // Update the active status for all accounts
+                for acc in &mut self.accounts {
+                    acc.is_active = acc.email == email;
+                }
                 self.active_account = Some(index);
-                self.set_status(&format!("Activated account: {}", account.name));
-                self.accounts = list_accounts().unwrap_or_default();
+                self.active_account_index = Some(index);
+                self.set_status(&format!("Activated account: {}", self.accounts[index].name));
             }
         }
     }
