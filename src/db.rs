@@ -1,8 +1,8 @@
-use rusqlite::{Connection, Result as SqliteResult, params};
-use std::path::PathBuf;
-use std::fs;
-use std::process::Command;
 use dirs;
+use rusqlite::{params, Connection, Result as SqliteResult};
+use std::fs;
+use std::path::PathBuf;
+use std::process::Command;
 
 #[derive(Debug, Clone)]
 pub struct Account {
@@ -46,39 +46,43 @@ pub fn init_db() -> SqliteResult<()> {
         )",
         [],
     )?;
-    
+
     Ok(())
 }
 
 pub fn list_accounts() -> SqliteResult<Vec<Account>> {
     let conn = Connection::open(get_db_path())?;
     let mut stmt = conn.prepare("SELECT name, email, is_active FROM accounts")?;
-    let accounts = stmt.query_map([], |row| {
-        Ok(Account {
-            name: row.get(0)?,
-            email: row.get(1)?,
-            is_active: row.get::<_, i32>(2)? == 1,
-        })
-    })?
-    .collect::<Result<Vec<_>, _>>()?;
+    let accounts = stmt
+        .query_map([], |row| {
+            Ok(Account {
+                name: row.get(0)?,
+                email: row.get(1)?,
+                is_active: row.get::<_, i32>(2)? == 1,
+            })
+        })?
+        .collect::<Result<Vec<_>, _>>()?;
     Ok(accounts)
 }
 
 pub fn add_account(name: &str, email: &str) -> Result<String, String> {
     let conn = Connection::open(get_db_path()).map_err(|e| e.to_string())?;
 
-    conn.execute("UPDATE accounts SET is_active = 0", []).map_err(|e| e.to_string())?;
+    conn.execute("UPDATE accounts SET is_active = 0", [])
+        .map_err(|e| e.to_string())?;
     conn.execute(
         "INSERT OR REPLACE INTO accounts (email, name, is_active) VALUES (?, ?, 1)",
         params![email, name],
-    ).map_err(|e| e.to_string())?;
+    )
+    .map_err(|e| e.to_string())?;
 
     let (private_key, public_key) = generate_ssh_key(email)?;
 
     conn.execute(
         "INSERT OR REPLACE INTO ssh_keys (email, private_key, public_key) VALUES (?, ?, ?)",
         params![email, &private_key, &public_key],
-    ).map_err(|e| e.to_string())?;
+    )
+    .map_err(|e| e.to_string())?;
 
     run_git_command(&["config", "--global", "user.name", name])?;
     run_git_command(&["config", "--global", "user.email", email])?;
@@ -89,19 +93,23 @@ pub fn add_account(name: &str, email: &str) -> Result<String, String> {
 pub fn remove_account(email: &str) -> Result<(), String> {
     let conn = Connection::open(get_db_path()).map_err(|e| e.to_string())?;
 
-    let is_active: bool = conn.query_row(
-        "SELECT is_active FROM accounts WHERE email = ?",
-        params![email],
-        |row| row.get(0)
-    ).unwrap_or(false);
+    let is_active: bool = conn
+        .query_row(
+            "SELECT is_active FROM accounts WHERE email = ?",
+            params![email],
+            |row| row.get(0),
+        )
+        .unwrap_or(false);
 
-    conn.execute("DELETE FROM accounts WHERE email = ?", params![email]).map_err(|e| e.to_string())?;
-    conn.execute("DELETE FROM ssh_keys WHERE email = ?", params![email]).map_err(|e| e.to_string())?;
+    conn.execute("DELETE FROM accounts WHERE email = ?", params![email])
+        .map_err(|e| e.to_string())?;
+    conn.execute("DELETE FROM ssh_keys WHERE email = ?", params![email])
+        .map_err(|e| e.to_string())?;
 
     if is_active {
         run_git_command(&["config", "--global", "--unset", "user.name"])?;
         run_git_command(&["config", "--global", "--unset", "user.email"])?;
-        
+
         let ssh_dir = get_ssh_dir();
         fs::remove_file(ssh_dir.join("id_ed25519")).ok();
         fs::remove_file(ssh_dir.join("id_ed25519.pub")).ok();
@@ -113,17 +121,21 @@ pub fn remove_account(email: &str) -> Result<(), String> {
 pub fn switch_account(email: &str) -> Result<(), String> {
     let conn = Connection::open(get_db_path()).map_err(|e| e.to_string())?;
 
-    conn.execute("UPDATE accounts SET is_active = 0", []).map_err(|e| e.to_string())?;
+    conn.execute("UPDATE accounts SET is_active = 0", [])
+        .map_err(|e| e.to_string())?;
     conn.execute(
         "UPDATE accounts SET is_active = 1 WHERE email = ?",
         params![email],
-    ).map_err(|e| e.to_string())?;
+    )
+    .map_err(|e| e.to_string())?;
 
-    let name: String = conn.query_row(
-        "SELECT name FROM accounts WHERE email = ?",
-        params![email],
-        |row| row.get(0)
-    ).map_err(|e| e.to_string())?;
+    let name: String = conn
+        .query_row(
+            "SELECT name FROM accounts WHERE email = ?",
+            params![email],
+            |row| row.get(0),
+        )
+        .map_err(|e| e.to_string())?;
 
     set_active_ssh_key(email)?;
 
@@ -144,7 +156,16 @@ fn generate_ssh_key(email: &str) -> Result<(Vec<u8>, Vec<u8>), String> {
     fs::remove_file(&public_key_path).ok();
 
     Command::new("ssh-keygen")
-        .args(&["-t", "ed25519", "-f", private_key_path.to_str().unwrap(), "-N", "", "-C", email])
+        .args(&[
+            "-t",
+            "ed25519",
+            "-f",
+            private_key_path.to_str().unwrap(),
+            "-N",
+            "",
+            "-C",
+            email,
+        ])
         .output()
         .map_err(|e| e.to_string())?;
 
@@ -156,11 +177,13 @@ fn generate_ssh_key(email: &str) -> Result<(Vec<u8>, Vec<u8>), String> {
 
 fn set_active_ssh_key(email: &str) -> Result<(), String> {
     let conn = Connection::open(get_db_path()).map_err(|e| e.to_string())?;
-    let (private_key, public_key): (Vec<u8>, Vec<u8>) = conn.query_row(
-        "SELECT private_key, public_key FROM ssh_keys WHERE email = ?",
-        params![email],
-        |row| Ok((row.get(0)?, row.get(1)?))
-    ).map_err(|e| e.to_string())?;
+    let (private_key, public_key): (Vec<u8>, Vec<u8>) = conn
+        .query_row(
+            "SELECT private_key, public_key FROM ssh_keys WHERE email = ?",
+            params![email],
+            |row| Ok((row.get(0)?, row.get(1)?)),
+        )
+        .map_err(|e| e.to_string())?;
 
     let ssh_dir = get_ssh_dir();
     fs::write(ssh_dir.join("id_ed25519"), private_key).map_err(|e| e.to_string())?;
@@ -171,12 +194,14 @@ fn set_active_ssh_key(email: &str) -> Result<(), String> {
 
 pub fn get_ssh_key(email: &str) -> Result<String, String> {
     let conn = Connection::open(get_db_path()).map_err(|e| e.to_string())?;
-    let public_key: Vec<u8> = conn.query_row(
-        "SELECT public_key FROM ssh_keys WHERE email = ?",
-        params![email],
-        |row| row.get(0)
-    ).map_err(|e| e.to_string())?;
-    
+    let public_key: Vec<u8> = conn
+        .query_row(
+            "SELECT public_key FROM ssh_keys WHERE email = ?",
+            params![email],
+            |row| row.get(0),
+        )
+        .map_err(|e| e.to_string())?;
+
     String::from_utf8(public_key).map_err(|e| e.to_string())
 }
 
@@ -202,11 +227,13 @@ pub fn get_current_user() -> Result<Option<Account>, String> {
     }
 
     let conn = Connection::open(get_db_path()).map_err(|e| e.to_string())?;
-    let is_active: bool = conn.query_row(
-        "SELECT is_active FROM accounts WHERE email = ?",
-        params![&email],
-        |row| row.get(0)
-    ).unwrap_or(false);
+    let is_active: bool = conn
+        .query_row(
+            "SELECT is_active FROM accounts WHERE email = ?",
+            params![&email],
+            |row| row.get(0),
+        )
+        .unwrap_or(false);
 
     Ok(Some(Account {
         name,

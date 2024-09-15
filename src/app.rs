@@ -1,21 +1,27 @@
 // shitty code, need to modularise it
 
+use arboard::Clipboard;
 use color_eyre::Result;
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span, Text},
-    widgets::{Block, Borders, List, ListItem, ListState, Paragraph, Tabs, Clear},
+    widgets::{Block, Borders, Clear, List, ListItem, ListState, Paragraph, Tabs},
     Frame,
 };
-use std::{process::Command, time::{Duration, Instant}};
-use arboard::Clipboard;
-use std::fmt;
-use std::default::Default;
 use regex::Regex;
+use std::default::Default;
+use std::fmt;
+use std::{
+    process::Command,
+    time::{Duration, Instant},
+};
 
-use crate::db::{Account as DbAccount, init_db, list_accounts, add_account, remove_account, switch_account, get_ssh_key, get_current_user};
+use crate::db::{
+    add_account, get_current_user, get_ssh_key, init_db, list_accounts, remove_account,
+    switch_account, Account as DbAccount,
+};
 
 pub struct App {
     running: bool,
@@ -133,22 +139,29 @@ impl App {
             add_account_focus: AddAccountField::Name,
         };
         app.status_message = "Welcome to GitSwitch-Tui!".to_string();
-        
+
         // Set the active account index based on the current Git user
         if let Ok(Some(current_user)) = get_current_user() {
-            if let Some(index) = app.accounts.iter().position(|a| a.email == current_user.email) {
+            if let Some(index) = app
+                .accounts
+                .iter()
+                .position(|a| a.email == current_user.email)
+            {
                 app.active_account_index = Some(index);
                 app.active_account = Some(index);
             }
         }
-        
+
         Ok(app)
     }
 
-    pub fn run(&mut self, terminal: &mut ratatui::Terminal<impl ratatui::backend::Backend>) -> Result<()> {
+    pub fn run(
+        &mut self,
+        terminal: &mut ratatui::Terminal<impl ratatui::backend::Backend>,
+    ) -> Result<()> {
         while self.running {
             terminal.draw(|frame| self.draw(frame))?;
-            
+
             if let Event::Key(key) = event::read()? {
                 self.handle_key_event(key);
             }
@@ -160,11 +173,14 @@ impl App {
         let chunks = Layout::default()
             .direction(Direction::Vertical)
             .margin(1)
-            .constraints([
-                Constraint::Length(3),
-                Constraint::Min(0),
-                Constraint::Length(1),
-            ].as_ref())
+            .constraints(
+                [
+                    Constraint::Length(3),
+                    Constraint::Min(0),
+                    Constraint::Length(1),
+                ]
+                .as_ref(),
+            )
             .split(frame.size());
 
         self.draw_tabs(frame, chunks[0]);
@@ -180,10 +196,18 @@ impl App {
     fn draw_tabs(&self, frame: &mut Frame, area: Rect) {
         let titles = vec!["Accounts", "Help"];
         let tabs = Tabs::new(titles)
-            .block(Block::default().borders(Borders::ALL).title("GitSwitch-Tui"))
+            .block(
+                Block::default()
+                    .borders(Borders::ALL)
+                    .title("GitSwitch-Tui"),
+            )
             .select(self.current_tab as usize)
             .style(Style::default().fg(Color::DarkGray))
-            .highlight_style(Style::default().fg(Color::LightGreen).add_modifier(Modifier::BOLD));
+            .highlight_style(
+                Style::default()
+                    .fg(Color::LightGreen)
+                    .add_modifier(Modifier::BOLD),
+            );
         frame.render_widget(tabs, area);
     }
 
@@ -202,21 +226,30 @@ impl App {
 
         if self.accounts.is_empty() {
             let message = vec![
-                Line::from(Span::styled("No accounts", Style::default().fg(Color::Yellow))),
+                Line::from(Span::styled(
+                    "No accounts",
+                    Style::default().fg(Color::Yellow),
+                )),
                 Line::from(""),
-                Line::from(Span::styled("Press 'a' to add a new account", Style::default().fg(Color::Green))),
+                Line::from(Span::styled(
+                    "Press 'a' to add a new account",
+                    Style::default().fg(Color::Green),
+                )),
             ];
             let paragraph = Paragraph::new(message)
                 .block(Block::default().borders(Borders::ALL).title("Accounts"))
                 .alignment(ratatui::layout::Alignment::Center);
             frame.render_widget(paragraph, chunks[0]);
         } else {
-            let items: Vec<ListItem> = self.accounts
+            let items: Vec<ListItem> = self
+                .accounts
                 .iter()
                 .enumerate()
                 .map(|(index, account)| {
                     let style = if Some(index) == self.active_account {
-                        Style::default().fg(Color::LightGreen).add_modifier(Modifier::BOLD)
+                        Style::default()
+                            .fg(Color::LightGreen)
+                            .add_modifier(Modifier::BOLD)
                     } else {
                         Style::default().fg(Color::Gray)
                     };
@@ -249,18 +282,35 @@ impl App {
                     Span::styled(&account.email, Style::default().fg(Color::LightBlue)),
                 ]),
                 Line::from(Span::styled(
-                    if Some(index) == self.active_account { "● Active" } else { "○ Inactive" },
-                    Style::default().fg(if Some(index) == self.active_account { Color::LightGreen } else { Color::Gray }),
+                    if Some(index) == self.active_account {
+                        "● Active"
+                    } else {
+                        "○ Inactive"
+                    },
+                    Style::default().fg(if Some(index) == self.active_account {
+                        Color::LightGreen
+                    } else {
+                        Color::Gray
+                    }),
                 )),
                 Line::from(""),
-                Line::from(Span::styled("Enter: Copy SSH key | Space: Set active", Style::default().fg(Color::Yellow))),
-                Line::from(Span::styled("a: Add new account | r: Remove account", Style::default().fg(Color::Cyan))),
+                Line::from(Span::styled(
+                    "Enter: Copy SSH key | Space: Set active",
+                    Style::default().fg(Color::Yellow),
+                )),
+                Line::from(Span::styled(
+                    "a: Add new account | r: Remove account",
+                    Style::default().fg(Color::Cyan),
+                )),
             ])
             .block(Block::default().borders(Borders::ALL).title("Account Info"));
             frame.render_widget(info, chunks[1]);
         } else {
             let info = Paragraph::new(vec![
-                Line::from(Span::styled("No account selected", Style::default().fg(Color::Yellow))),
+                Line::from(Span::styled(
+                    "No account selected",
+                    Style::default().fg(Color::Yellow),
+                )),
                 Line::from(""),
                 Line::from("Select an account from the list"),
                 Line::from("or add a new one with 'a'"),
@@ -273,7 +323,10 @@ impl App {
 
     fn draw_help(&self, frame: &mut Frame, area: Rect) {
         let text = vec![
-            Line::from(Span::styled("Keyboard Shortcuts", Style::default().add_modifier(Modifier::BOLD))),
+            Line::from(Span::styled(
+                "Keyboard Shortcuts",
+                Style::default().add_modifier(Modifier::BOLD),
+            )),
             Line::from(""),
             Line::from(vec![
                 Span::styled("Tab", Style::default().fg(Color::Yellow)),
@@ -304,8 +357,7 @@ impl App {
                 Span::raw(": Quit"),
             ]),
         ];
-        let help = Paragraph::new(text)
-            .block(Block::default().borders(Borders::ALL).title("Help"));
+        let help = Paragraph::new(text).block(Block::default().borders(Borders::ALL).title("Help"));
         frame.render_widget(help, area);
     }
 
@@ -322,18 +374,27 @@ impl App {
         match &self.popup {
             PopupType::AddAccount => {
                 let name_style = if self.add_account_focus == AddAccountField::Name {
-                    Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)
+                    Style::default()
+                        .fg(Color::Yellow)
+                        .add_modifier(Modifier::BOLD)
                 } else {
                     Style::default().fg(Color::Gray)
                 };
                 let email_style = if self.add_account_focus == AddAccountField::Email {
-                    Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)
+                    Style::default()
+                        .fg(Color::Cyan)
+                        .add_modifier(Modifier::BOLD)
                 } else {
                     Style::default().fg(Color::Gray)
                 };
 
                 let popup = Paragraph::new(vec![
-                    Line::from(Span::styled("Add New Account", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD))),
+                    Line::from(Span::styled(
+                        "Add New Account",
+                        Style::default()
+                            .fg(Color::Green)
+                            .add_modifier(Modifier::BOLD),
+                    )),
                     Line::from(""),
                     Line::from(vec![
                         Span::styled("Name: ", name_style),
@@ -344,35 +405,63 @@ impl App {
                         Span::styled(&self.new_account_email, email_style),
                     ]),
                     Line::from(""),
-                    Line::from(Span::styled("↑/↓: Switch fields | Enter: Submit | Esc: Cancel", Style::default().fg(Color::Magenta))),
+                    Line::from(Span::styled(
+                        "↑/↓: Switch fields | Enter: Submit | Esc: Cancel",
+                        Style::default().fg(Color::Magenta),
+                    )),
                 ])
-                .block(Block::default().title("Add Account").borders(Borders::ALL).border_style(Style::default().fg(Color::LightBlue)))
+                .block(
+                    Block::default()
+                        .title("Add Account")
+                        .borders(Borders::ALL)
+                        .border_style(Style::default().fg(Color::LightBlue)),
+                )
                 .style(Style::default().fg(Color::White));
                 frame.render_widget(popup, area);
-            },
+            }
             PopupType::RemoveConfirmation => {
                 if let Some(index) = self.active_account_index {
                     if let Some(account) = self.accounts.get(index) {
                         let popup = Paragraph::new(vec![
-                            Line::from(Span::styled("Remove Account", Style::default().fg(Color::Red).add_modifier(Modifier::BOLD))),
+                            Line::from(Span::styled(
+                                "Remove Account",
+                                Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
+                            )),
+                            Line::from(""),
+                            Line::from(vec![Span::raw(
+                                "Are you sure you want to remove this account?",
+                            )]),
                             Line::from(""),
                             Line::from(vec![
-                                Span::raw("Are you sure you want to remove this account?"),
-                            ]),
-                            Line::from(""),
-                            Line::from(vec![
-                                Span::styled("Name: ", Style::default().add_modifier(Modifier::BOLD)),
+                                Span::styled(
+                                    "Name: ",
+                                    Style::default().add_modifier(Modifier::BOLD),
+                                ),
                                 Span::styled(&account.name, Style::default().fg(Color::Yellow)),
                             ]),
                             Line::from(vec![
-                                Span::styled("Email: ", Style::default().add_modifier(Modifier::BOLD)),
+                                Span::styled(
+                                    "Email: ",
+                                    Style::default().add_modifier(Modifier::BOLD),
+                                ),
                                 Span::styled(&account.email, Style::default().fg(Color::Cyan)),
                             ]),
                             Line::from(""),
-                            Line::from(Span::styled("Press 'y' to confirm", Style::default().fg(Color::Green))),
-                            Line::from(Span::styled("Press 'n' to cancel", Style::default().fg(Color::Red))),
+                            Line::from(Span::styled(
+                                "Press 'y' to confirm",
+                                Style::default().fg(Color::Green),
+                            )),
+                            Line::from(Span::styled(
+                                "Press 'n' to cancel",
+                                Style::default().fg(Color::Red),
+                            )),
                         ])
-                        .block(Block::default().title("Confirm Removal").borders(Borders::ALL).border_style(Style::default().fg(Color::LightRed)))
+                        .block(
+                            Block::default()
+                                .title("Confirm Removal")
+                                .borders(Borders::ALL)
+                                .border_style(Style::default().fg(Color::LightRed)),
+                        )
                         .style(Style::default().fg(Color::White));
                         frame.render_widget(popup, area);
                     } else {
@@ -389,92 +478,90 @@ impl App {
                         .style(Style::default().fg(Color::Red));
                     frame.render_widget(error_popup, area);
                 }
-            },
-            PopupType::None => {},
+            }
+            PopupType::None => {}
         }
     }
 
     fn handle_key_event(&mut self, key: KeyEvent) {
         match &self.popup {
-            PopupType::None => {
-                match (self.input_mode, key.code) {
-                    (InputMode::Normal, KeyCode::Char('q')) => self.quit(),
-                    (InputMode::Normal, KeyCode::Char('c')) if key.modifiers == KeyModifiers::CONTROL => self.quit(),
-                    (InputMode::Normal, KeyCode::Tab) => self.next_tab(),
-                    (InputMode::Normal, KeyCode::BackTab) => self.previous_tab(),
-                    (InputMode::Normal, KeyCode::Char('h')) => self.switch_to_tab(Tab::Help),
-                    (InputMode::Normal, KeyCode::Char('1')) => self.switch_to_tab(Tab::Accounts),
-                    (InputMode::Normal, KeyCode::Char('a')) => {
-                        self.popup = PopupType::AddAccount;
-                        self.new_account_name.clear();
-                        self.new_account_email.clear();
-                        self.input_mode = InputMode::Editing;
-                    },
-                    (InputMode::Normal, KeyCode::Char('r')) => {
-                        if self.active_account_index.is_some() {
-                            self.popup = PopupType::RemoveConfirmation;
-                        }
-                    },
-                    (InputMode::Normal, KeyCode::Up) => self.select_previous_account(),
-                    (InputMode::Normal, KeyCode::Down) => self.select_next_account(),
-                    (InputMode::Normal, KeyCode::Enter) => {
-                        if let Some(index) = self.active_account_index {
-                            self.copy_ssh_key_to_clipboard(index);
-                        }
+            PopupType::None => match (self.input_mode, key.code) {
+                (InputMode::Normal, KeyCode::Char('q')) => self.quit(),
+                (InputMode::Normal, KeyCode::Char('c'))
+                    if key.modifiers == KeyModifiers::CONTROL =>
+                {
+                    self.quit()
+                }
+                (InputMode::Normal, KeyCode::Tab) => self.next_tab(),
+                (InputMode::Normal, KeyCode::BackTab) => self.previous_tab(),
+                (InputMode::Normal, KeyCode::Char('h')) => self.switch_to_tab(Tab::Help),
+                (InputMode::Normal, KeyCode::Char('1')) => self.switch_to_tab(Tab::Accounts),
+                (InputMode::Normal, KeyCode::Char('a')) => {
+                    self.popup = PopupType::AddAccount;
+                    self.new_account_name.clear();
+                    self.new_account_email.clear();
+                    self.input_mode = InputMode::Editing;
+                }
+                (InputMode::Normal, KeyCode::Char('r')) => {
+                    if self.active_account_index.is_some() {
+                        self.popup = PopupType::RemoveConfirmation;
                     }
-                    (InputMode::Normal, KeyCode::Char(' ')) => {
-                        if let Some(index) = self.active_account_index {
-                            self.set_active_account(index);
-                        }
+                }
+                (InputMode::Normal, KeyCode::Up) => self.select_previous_account(),
+                (InputMode::Normal, KeyCode::Down) => self.select_next_account(),
+                (InputMode::Normal, KeyCode::Enter) => {
+                    if let Some(index) = self.active_account_index {
+                        self.copy_ssh_key_to_clipboard(index);
                     }
-                    _ => {}
                 }
+                (InputMode::Normal, KeyCode::Char(' ')) => {
+                    if let Some(index) = self.active_account_index {
+                        self.set_active_account(index);
+                    }
+                }
+                _ => {}
             },
-            PopupType::AddAccount => {
-                match key.code {
-                    KeyCode::Enter => {
-                        if !self.new_account_name.is_empty() && !self.new_account_email.is_empty() {
-                            self.submit_new_account();
-                        } else {
-                            self.set_status("Please fill both name and email");
-                        }
-                    },
-                    KeyCode::Esc => {
-                        self.popup = PopupType::None;
-                        self.input_mode = InputMode::Normal;
-                    },
-                    KeyCode::Up | KeyCode::Down | KeyCode::Tab | KeyCode::BackTab => {
-                        self.add_account_focus = match self.add_account_focus {
-                            AddAccountField::Name => AddAccountField::Email,
-                            AddAccountField::Email => AddAccountField::Name,
-                        };
-                    },
-                    KeyCode::Char(c) => {
-                        match self.add_account_focus {
-                            AddAccountField::Name => self.new_account_name.push(c),
-                            AddAccountField::Email => self.new_account_email.push(c),
-                        }
-                    },
-                    KeyCode::Backspace => {
-                        match self.add_account_focus {
-                            AddAccountField::Name => { self.new_account_name.pop(); },
-                            AddAccountField::Email => { self.new_account_email.pop(); },
-                        }
-                    },
-                    _ => {}
+            PopupType::AddAccount => match key.code {
+                KeyCode::Enter => {
+                    if !self.new_account_name.is_empty() && !self.new_account_email.is_empty() {
+                        self.submit_new_account();
+                    } else {
+                        self.set_status("Please fill both name and email");
+                    }
                 }
+                KeyCode::Esc => {
+                    self.popup = PopupType::None;
+                    self.input_mode = InputMode::Normal;
+                }
+                KeyCode::Up | KeyCode::Down | KeyCode::Tab | KeyCode::BackTab => {
+                    self.add_account_focus = match self.add_account_focus {
+                        AddAccountField::Name => AddAccountField::Email,
+                        AddAccountField::Email => AddAccountField::Name,
+                    };
+                }
+                KeyCode::Char(c) => match self.add_account_focus {
+                    AddAccountField::Name => self.new_account_name.push(c),
+                    AddAccountField::Email => self.new_account_email.push(c),
+                },
+                KeyCode::Backspace => match self.add_account_focus {
+                    AddAccountField::Name => {
+                        self.new_account_name.pop();
+                    }
+                    AddAccountField::Email => {
+                        self.new_account_email.pop();
+                    }
+                },
+                _ => {}
             },
-            PopupType::RemoveConfirmation => {
-                match key.code {
-                    KeyCode::Char('y') | KeyCode::Char('Y') => {
-                        self.remove_account();
-                        self.popup = PopupType::None;
-                    },
-                    KeyCode::Char('n') | KeyCode::Char('N') | KeyCode::Esc => {
-                        self.popup = PopupType::None;
-                    },
-                    _ => {}
+            PopupType::RemoveConfirmation => match key.code {
+                KeyCode::Char('y') | KeyCode::Char('Y') => {
+                    self.remove_account();
+                    self.popup = PopupType::None;
                 }
+                KeyCode::Char('n') | KeyCode::Char('N') | KeyCode::Esc => {
+                    self.popup = PopupType::None;
+                }
+                _ => {}
             },
         }
     }
@@ -510,7 +597,11 @@ impl App {
     fn select_previous_account(&mut self) {
         if !self.accounts.is_empty() {
             self.active_account_index = Some(self.active_account_index.map_or(0, |i| {
-                if i == 0 { self.accounts.len() - 1 } else { i - 1 }
+                if i == 0 {
+                    self.accounts.len() - 1
+                } else {
+                    i - 1
+                }
             }));
             self.set_status("Selected previous account");
         }
@@ -519,7 +610,11 @@ impl App {
     fn select_next_account(&mut self) {
         if !self.accounts.is_empty() {
             self.active_account_index = Some(self.active_account_index.map_or(0, |i| {
-                if i == self.accounts.len() - 1 { 0 } else { i + 1 }
+                if i == self.accounts.len() - 1 {
+                    0
+                } else {
+                    i + 1
+                }
             }));
             self.set_status("Selected next account");
         }
@@ -627,4 +722,3 @@ fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
         ])
         .split(popup_layout[1])[1]
 }
-

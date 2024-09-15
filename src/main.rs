@@ -1,18 +1,18 @@
 use color_eyre::Result;
-use ratatui::Terminal;
-use ratatui::backend::CrosstermBackend;
-use std::io;
 use crossterm::{
-    terminal::{enable_raw_mode, disable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
     execute,
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
+use ratatui::backend::CrosstermBackend;
+use ratatui::Terminal;
+use std::io;
 
 mod app;
 mod db;
 
 fn main() -> Result<()> {
     color_eyre::install()?;
-    
+
     // Setup terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();
