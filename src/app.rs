@@ -132,7 +132,7 @@ impl App {
             clipboard: Clipboard::new().expect("Failed to initialize clipboard"),
             add_account_focus: AddAccountField::Name,
         };
-        app.status_message = "Welcome to GitSwitch-Gui!".to_string();
+        app.status_message = "Welcome to GitSwitch-Tui!".to_string();
         
         // Set the active account index based on the current Git user
         if let Ok(Some(current_user)) = get_current_user() {
@@ -180,7 +180,7 @@ impl App {
     fn draw_tabs(&self, frame: &mut Frame, area: Rect) {
         let titles = vec!["Accounts", "Help"];
         let tabs = Tabs::new(titles)
-            .block(Block::default().borders(Borders::ALL).title("GitSwitch-Gui"))
+            .block(Block::default().borders(Borders::ALL).title("GitSwitch-Tui"))
             .select(self.current_tab as usize)
             .style(Style::default().fg(Color::DarkGray))
             .highlight_style(Style::default().fg(Color::LightGreen).add_modifier(Modifier::BOLD));
