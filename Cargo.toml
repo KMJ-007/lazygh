@@ -1,0 +1,11 @@
+[package]
+name = "github-account-tui"
+version = "0.1.0"
+authors = ["Karan Janthe <karanjanthe@gmail.com>"]
+license = "MIT"
+edition = "2021"
+
+[dependencies]
+crossterm = "0.28.1"
+ratatui = "0.28.1"
+color-eyre = "0.6.3"
