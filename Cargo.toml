@@ -37,9 +37,7 @@ cargo-dist-version = "0.22.1"
 # CI backends to support
 ci = "github"
 # The installers to generate for each app
-installers = ["shell", "powershell", "npm", "homebrew", "msi"]
-# A GitHub repo to push Homebrew formulas to
-tap = "kmj-007/lazygh"
+installers = ["shell", "powershell", "npm", "msi"]
 # Target platforms to build apps for (Rust target-triple syntax)
 targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "x86_64-unknown-linux-musl", "x86_64-pc-windows-msvc"]
 # The archive format to use for windows builds (defaults .zip)
@@ -48,7 +46,5 @@ windows-archive = ".tar.gz"
 unix-archive = ".tar.gz"
 # Path that installers should place binaries in
 install-path = "CARGO_HOME"
-# Publish jobs to run in CI
-publish-jobs = ["homebrew"]
 # Whether to install an updater program
 install-updater = true

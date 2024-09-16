@@ -69,6 +69,7 @@
 
         <Package Id='*'
             Keywords='Installer'
+            Description='A Terminal User Interface (TUI) application for managing multiple GitHub accounts easily'
             Manufacturer='Karan Janthe'
             InstallerVersion='450'
             Languages='1033'
