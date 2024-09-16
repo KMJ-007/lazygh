@@ -1,4 +1,8 @@
 {
+  "project": {
+    "homepage": "https://kmj-007.github.io/lazygh",
+    "repository": "https://github.com/KMJ-007/lazygh"
+  },
   "styles": {
     "theme": "axodark",
     "favicon": "https://www.axo.dev/favicon.ico"
