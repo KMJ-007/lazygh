@@ -1,4 +1,7 @@
 {
+  "build": {
+    "path_prefix": "lazygh"
+  },
   "project": {
     "homepage": "https://kmj-007.github.io/lazygh",
     "repository": "https://github.com/KMJ-007/lazygh"

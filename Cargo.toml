@@ -5,6 +5,7 @@ authors = ["Karan Janthe <karanjanthe@gmail.com>"]
 license = "MIT"
 edition = "2021"
 repository = "https://github.com/kmj-007/lazygh"
+homepage = "https://kmj-007.github.io/lazygh"
 description = "A Terminal User Interface (TUI) application for managing multiple GitHub accounts easily"
 keywords = ["github", "git", "tui", "account-management", "ssh-keys"]
 categories = ["command-line-utilities", "development-tools"]
