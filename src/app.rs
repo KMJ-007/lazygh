@@ -196,11 +196,7 @@ impl App {
     fn draw_tabs(&self, frame: &mut Frame, area: Rect) {
         let titles = vec!["Accounts", "Help"];
         let tabs = Tabs::new(titles)
-            .block(
-                Block::default()
-                    .borders(Borders::ALL)
-                    .title("LazyGH"),
-            )
+            .block(Block::default().borders(Borders::ALL).title("LazyGH"))
             .select(self.current_tab as usize)
             .style(Style::default().fg(Color::DarkGray))
             .highlight_style(
