@@ -356,8 +356,21 @@ impl App {
                 Span::styled("q", Style::default().fg(Color::LightRed)),
                 Span::raw(": Quit"),
             ]),
+            Line::from(""),
+            Line::from(vec![
+                Span::raw("Follow the developer on Twitter/X: "),
+                Span::styled(
+                    "@KaranJanthe",
+                    Style::default()
+                        .fg(Color::LightBlue)
+                        .add_modifier(Modifier::UNDERLINED)
+                        .add_modifier(Modifier::ITALIC),
+                ),
+            ]),
         ];
-        let help = Paragraph::new(text).block(Block::default().borders(Borders::ALL).title("Help"));
+        let help = Paragraph::new(text)
+            .block(Block::default().borders(Borders::ALL).title("Help"))
+            .style(Style::default().fg(Color::White));
         frame.render_widget(help, area);
     }
 
