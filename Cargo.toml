@@ -4,6 +4,13 @@ version = "0.1.0"
 authors = ["Karan Janthe <karanjanthe@gmail.com>"]
 license = "MIT"
 edition = "2021"
+repository = "https://github.com/kmj-007/lazygh"
+
+[package.metadata.wix]
+upgrade-guid = "B4DC81DF-8698-485D-B31B-FBF71C73F319"
+path-guid = "17F93089-B520-4CFD-94D9-183527AEBA4A"
+license = false
+eula = false
 
 [dependencies]
 crossterm = "0.28.1"
@@ -13,3 +20,31 @@ arboard = "3.4.1"
 regex = "1.5"
 rusqlite = { version = "0.28.0", features = ["bundled"] }
 dirs = "4.0"
+
+# The profile that 'cargo dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
+
+# Config for 'cargo dist'
+[workspace.metadata.dist]
+# The preferred cargo-dist version to use in CI (Cargo.toml SemVer syntax)
+cargo-dist-version = "0.22.1"
+# CI backends to support
+ci = "github"
+# The installers to generate for each app
+installers = ["shell", "powershell", "npm", "homebrew", "msi"]
+# A GitHub repo to push Homebrew formulas to
+tap = "kmj-007/lazygh"
+# Target platforms to build apps for (Rust target-triple syntax)
+targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "x86_64-unknown-linux-musl", "x86_64-pc-windows-msvc"]
+# The archive format to use for windows builds (defaults .zip)
+windows-archive = ".tar.gz"
+# The archive format to use for non-windows builds (defaults .tar.xz)
+unix-archive = ".tar.gz"
+# Path that installers should place binaries in
+install-path = "CARGO_HOME"
+# Publish jobs to run in CI
+publish-jobs = ["homebrew"]
+# Whether to install an updater program
+install-updater = true
