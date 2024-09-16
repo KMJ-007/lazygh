@@ -34,6 +34,7 @@ If you encounter any problems or have suggestions for improvements, please open 
 
 ## Roadmap
 
+- [ ] fix the cargo auto release version mangment with release workflow 
 - [ ] adding lazygh to binstall
 - [ ] adding lazygh to nix-env
 - [ ] adding lazygh to nix flake
