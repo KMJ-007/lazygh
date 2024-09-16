@@ -34,7 +34,10 @@ If you encounter any problems or have suggestions for improvements, please open 
 
 ## Roadmap
 
-- [ ] Create a cross-platform installer(only homebrew tap is remaining)
+- [ ] adding lazygh to binstall
+- [ ] adding lazygh to nix-env
+- [ ] adding lazygh to nix flake
+- [ ] ability to maintain multiple gh config files and able to categorise them in workspace fashion but in simpler way
 - [ ] don't know other things to add, create an issue if you have any ideas
 
 ## Security

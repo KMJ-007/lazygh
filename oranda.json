@@ -11,6 +11,11 @@
     "favicon": "https://www.axo.dev/favicon.ico"
   },
   "marketing": {
+    "analytics": {
+      "google_analytics": {
+        "tracking_id": "G-TKS59X89PP"
+      }
+    },
     "social": {
       "image": "https://www.axo.dev/meta_small.jpeg",
       "image_alt": "axo",
@@ -22,14 +27,11 @@
     "artifacts": {
       "package_managers": {
         "preferred": {
-          "npm": "npm install @axodotdev/oranda --save-dev",
-          "cargo": "cargo install oranda --locked --profile=dist"
+          "npm": "npm install lazygh --global",
+          "cargo": "cargo install lazygh"
         },
         "additional": {
-          "npx": "npx @axodotdev/oranda",
-          "binstall": "cargo binstall oranda",
-          "nix-env": "nix-env -i oranda",
-          "nix flake": "nix profile install github:axodotdev/oranda"
+          "npx": "npx lazygh"
         }
       }
     }
