@@ -27,7 +27,6 @@
     "artifacts": {
       "package_managers": {
         "preferred": {
-          "npm": "npm install lazygh --global",
           "cargo": "cargo install lazygh"
         },
         "additional": {
