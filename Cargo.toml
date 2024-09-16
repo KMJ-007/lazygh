@@ -5,6 +5,10 @@ authors = ["Karan Janthe <karanjanthe@gmail.com>"]
 license = "MIT"
 edition = "2021"
 repository = "https://github.com/kmj-007/lazygh"
+description = "A Terminal User Interface (TUI) application for managing multiple GitHub accounts easily"
+keywords = ["github", "git", "tui", "account-management", "ssh-keys"]
+categories = ["command-line-utilities", "development-tools"]
+readme = "README.md"
 
 [package.metadata.wix]
 upgrade-guid = "B4DC81DF-8698-485D-B31B-FBF71C73F319"
