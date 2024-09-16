@@ -138,7 +138,7 @@ impl App {
             clipboard: Clipboard::new().expect("Failed to initialize clipboard"),
             add_account_focus: AddAccountField::Name,
         };
-        app.status_message = "Welcome to GitSwitch-Tui!".to_string();
+        app.status_message = "Welcome to LazyGH!".to_string();
 
         // Set the active account index based on the current Git user
         if let Ok(Some(current_user)) = get_current_user() {
@@ -199,7 +199,7 @@ impl App {
             .block(
                 Block::default()
                     .borders(Borders::ALL)
-                    .title("GitSwitch-Tui"),
+                    .title("LazyGH"),
             )
             .select(self.current_tab as usize)
             .style(Style::default().fg(Color::DarkGray))

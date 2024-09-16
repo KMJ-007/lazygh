@@ -1,5 +1,5 @@
 [package]
-name = "github-account-tui"
+name = "lazygh"
 version = "0.1.0"
 authors = ["Karan Janthe <karanjanthe@gmail.com>"]
 license = "MIT"
