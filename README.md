@@ -6,7 +6,7 @@ LazyGH is a Terminal User Interface (TUI) application for managing multiple GitH
 
 Check out the demo to see LazyGH in action:
 
-![LazyGH Demo](https://cloud-cft5j3zn6-hack-club-bot.vercel.app/0demo.gif)
+![LazyGH Demo](https://cloud-hq5v2c9l2-hack-club-bot.vercel.app/0demo.gif)
 
 ## Features
 
