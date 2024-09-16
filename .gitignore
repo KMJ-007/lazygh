@@ -1,6 +1,1 @@
 /target
-
-# Oranda
-oranda-debug.log
-/public
-cargo-dist/public
