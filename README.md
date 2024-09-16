@@ -34,7 +34,7 @@ If you encounter any problems or have suggestions for improvements, please open 
 
 ## Roadmap
 
-- [ ] Create a cross-platform installer
+- [ ] Create a cross-platform installer(only homebrew tap is remaining)
 - [ ] don't know other things to add, create an issue if you have any ideas
 
 ## Security
