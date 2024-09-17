@@ -1,5 +1,7 @@
 # LazyGH
 
+⚠️ **WARNING: This project is highly under development. Do not use in production. There are several security issues which are yet to be addressed.** ⚠️
+
 LazyGH is a Terminal User Interface (TUI) application for managing multiple GitHub accounts easily. It allows you to switch between different Git configurations and SSH keys seamlessly.
 
 ## Demo
