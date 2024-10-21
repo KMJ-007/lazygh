@@ -19,7 +19,7 @@ eula = false
 
 [dependencies]
 crossterm = "0.28.1"
-ratatui = "0.28.1"
+ratatui = "0.29.0"
 color-eyre = "0.6.3"
 arboard = "3.4.1"
 regex = "1.5"
