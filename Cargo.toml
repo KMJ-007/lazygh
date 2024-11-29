@@ -23,7 +23,7 @@ ratatui = "0.28.1"
 color-eyre = "0.6.3"
 arboard = "3.4.1"
 regex = "1.5"
-rusqlite = { version = "0.28.0", features = ["bundled"] }
+rusqlite = { version = "0.32.1", features = ["bundled"] }
 dirs = "4.0"
 
 # The profile that 'cargo dist' will build with
