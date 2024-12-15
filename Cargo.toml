@@ -22,7 +22,7 @@ crossterm = "0.28.1"
 ratatui = "0.28.1"
 color-eyre = "0.6.3"
 arboard = "3.4.1"
-regex = "1.5"
+regex = "1.11"
 rusqlite = { version = "0.28.0", features = ["bundled"] }
 dirs = "4.0"
 
