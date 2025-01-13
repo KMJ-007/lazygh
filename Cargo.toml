@@ -24,7 +24,7 @@ color-eyre = "0.6.3"
 arboard = "3.4.1"
 regex = "1.11"
 rusqlite = { version = "0.28.0", features = ["bundled"] }
-dirs = "4.0"
+dirs = "6.0"
 
 # The profile that 'cargo dist' will build with
 [profile.dist]
