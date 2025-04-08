@@ -18,7 +18,7 @@ license = false
 eula = false
 
 [dependencies]
-crossterm = "0.28.1"
+crossterm = "0.29.0"
 ratatui = "0.29.0"
 color-eyre = "0.6.3"
 arboard = "3.5.0"
